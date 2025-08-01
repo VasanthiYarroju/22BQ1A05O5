@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+
+
 const MAX_URL_INPUTS = 5;
 const DEFAULT_VALIDITY_MINUTES = 30;
 let nextId = 0;
@@ -83,78 +85,65 @@ function UrlShortenerPage() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setMessage('');
-  setMessageType('');
-  setIsLoading(true);
-  setShortenedUrls([]);
-  setErrors({});
+    e.preventDefault();
+    setMessage('');
+    setMessageType('');
+    setIsLoading(true);
+    setShortenedUrls([]);
+    setErrors({});
 
-  const newErrors = {};
-  const urlsToProcess = urlInputs.filter((input) => input.longUrl.trim() !== '');
+    const newErrors = {};
+    const urlsToProcess = urlInputs.filter((input) => input.longUrl.trim() !== '');
 
-  if (urlsToProcess.length === 0) {
-    setMessage('Please enter at least one valid URL.');
-    setMessageType('error');
-    setIsLoading(false);
-    return;
-  }
-
-  urlsToProcess.forEach((input) => {
-    if (!isValidUrl(input.longUrl)) {
-      newErrors[`${input.id}-longUrl`] = 'Invalid URL format.';
+    if (urlsToProcess.length === 0) {
+      setMessage('Please enter at least one URL.');
+      setMessageType('error');
+      setIsLoading(false);
+      return;
     }
-  });
 
-  if (Object.keys(newErrors).length > 0) {
-    setErrors(newErrors);
-    setMessage('Please fix the errors in the form.');
-    setMessageType('error');
-    setIsLoading(false);
-    return;
-  }
+    urlsToProcess.forEach((input) => {
+      if (!isValidUrl(input.longUrl)) {
+        newErrors[`${input.id}-longUrl`] = 'Invalid URL format.';
+      }
+    });
 
-  const results = [];
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setMessage('Please fix the errors in the form.');
+      setMessageType('error');
+      setIsLoading(false);
+      return;
+    }
 
-  for (const input of urlsToProcess) {
-    try {
-      const proxyUrl = 'https://api.allorigins.win/raw?url=' +
-        encodeURIComponent('https://cleanuri.com/api/v1/shorten');
+    const results = [];
 
-      const res = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({ url: input.longUrl }),
-      });
+   
+    for (const input of urlsToProcess) {
+     
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      const data = await res.json();
-
-      if (data.result_url) {
+      if (isValidUrl(input.longUrl)) {
         results.push({
           originalUrl: input.longUrl,
-          shortenedUrl: data.result_url,
+          
+          shortenedUrl: `https://m.short/${Math.random().toString(36).substring(2, 8)}`,
         });
       } else {
+       
         results.push({
           originalUrl: input.longUrl,
-          shortenedUrl: 'Failed to shorten',
+          shortenedUrl: 'Invalid URL (mock failure)',
         });
       }
-    } catch {
-      results.push({
-        originalUrl: input.longUrl,
-        shortenedUrl: 'Request failed',
-      });
     }
-  }
+    
 
-  setShortenedUrls(results);
-  setIsLoading(false);
-  setMessage('URLs processed.');
-  setMessageType('success');
-};
+    setShortenedUrls(results);
+    setIsLoading(false);
+    
+    setMessageType('success');
+  };
 
   return (
     <div className="shortener-page">
@@ -173,7 +162,7 @@ function UrlShortenerPage() {
                 value={input.longUrl}
                 onChange={(e) => handleInputChange(input.id, e)}
                 placeholder="https://example.com"
-                required
+                
               />
               {errors[`${input.id}-longUrl`] && (
                 <p className="error-message">{errors[`${input.id}-longUrl`]}</p>
@@ -216,9 +205,13 @@ function UrlShortenerPage() {
               </p>
               <p>
                 <strong>Shortened:</strong>{' '}
-                <a href={url.shortenedUrl} target="_blank" rel="noopener noreferrer">
-                  {url.shortenedUrl}
-                </a>
+                {url.shortenedUrl === 'Invalid URL (mock failure)' ? (
+                    <span className="error-message">{url.shortenedUrl}</span>
+                ) : (
+                    <a href={url.shortenedUrl} target="_blank" rel="noopener noreferrer">
+                    {url.shortenedUrl}
+                    </a>
+                )}
               </p>
             </div>
           ))}
