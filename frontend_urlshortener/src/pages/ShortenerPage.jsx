@@ -25,7 +25,7 @@ function UrlShortenerPage() {
   const [shortenedUrls, setShortenedUrls] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = ''; // 'success', 'error', 'info'
+const [messageType, setMessageType] = useState(''); // 'success', 'error', 'info'
 
   // Helper function for URL validation
   const isValidUrl = (url) => {
